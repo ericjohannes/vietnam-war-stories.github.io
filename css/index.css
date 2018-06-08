@@ -16,6 +16,7 @@ body {
 /* choose how wide to make tooltip*/
 .tooltip-inner {
     min-width: 300px; 
+    text-align: justify; /* can be left too */
 }
 .navbar {
     min-height: 55px;
