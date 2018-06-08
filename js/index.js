@@ -106,6 +106,7 @@ function Topic (id, topic, contributor, affiliation, subaffiliation, youtube_lin
     this.affiliation = affiliation;
     this.subaffiliation = subaffiliation;
     this.youtube_link = youtube_link;
+    this.video_id = youtube_link.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)[1];
     this.topic_abstract = topic_abstract;
     this.time_period = time_period;
     this.region = region;
@@ -189,12 +190,12 @@ function getData (data, tabletop) {
 
 function addToSidebar (new_topic) {
     var video_id = new_topic.youtube_link.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)[1];
-    var new_sidebar_element =   '<div class="panel panel-default results-panel">' +
+    var new_sidebar_element =   '<div id="'+ new_topic.id +'" class="panel panel-default results-panel">' +
                                     '<div id="topic-sidebar-card-' + new_topic.id + '" class="results-panel-body" onClick="openTopicModal(' + new_topic.id + ')">' +
-                                        '<div class="media results-sidebar-media">' +
+                                        '<div class="media results-sidebar-media" data-video-id="'+ video_id +'" title="Click and hold to drag and re-order">' +
                                             '<div class="image-wrap topic-yt-thumbnail">' +
                                                 '<img class="results-media-image img-responsive pull-left" src="https://img.youtube.com/vi/' + video_id + '/mqdefault.jpg">' +
-                                                '<input type="button" id="playlist-btn-' + new_topic.id + '" class="btn btn-secondary pull-left results-add-playlist-button" value="+" />' +
+                                                '<input type="button" id="playlist-btn-' + new_topic.id + '" title="Add to Playlist" class="btn btn-secondary pull-left results-add-playlist-button" value="+" />' +
                                             '</div>' +
                                             '<div class="media-body results-media-body">' +
                                                 '<h4 class="results-media-heading"><b>' + new_topic.topic + '</b></h4>' + 
@@ -204,16 +205,28 @@ function addToSidebar (new_topic) {
                                         '</div>' +
                                     '</div>' + 
                                 '</div>';
-    $("#results-container").append(new_sidebar_element);
+    $("#simpleList").append(new_sidebar_element);
     if (new_topic.inPlaylist) {
         $("#playlist-btn-" + new_topic.id).attr("onClick", "removeFromPlaylist(" + new_topic.id + ")");
         $("#playlist-btn-" + new_topic.id).attr("value", "-");
+        $("#playlist-btn-" + new_topic.id).attr("title", "Remove from Playlist");
     } else {
         $("#playlist-btn-" + new_topic.id).attr("onClick", "addToPlaylist(" + new_topic.id + ")");
         $("#playlist-btn-" + new_topic.id).attr("value", "+");
+    }  
+
+};
+
+
+function img_find() {
+    var imgs = document.getElementsByClassName("results-media-image");
+    var imgSrcs = [];
+    for (var i = 0; i < imgs.length; i++) {
+        imgSrcs.push(imgs[i].src);
     }
-    
-}
+
+    //return imgSrcs;
+};
 
 function openTopicModal (topic_id) {
     $("#topic-modal").modal("show");
@@ -221,9 +234,9 @@ function openTopicModal (topic_id) {
     $('.modal-backdrop').appendTo('#map-container');
     
     var video_id = topics[topic_id].youtube_link.match(/(?:https?:\/{2})?(?:w{3}\.)?youtu(?:be)?\.(?:com|be)(?:\/watch\?v=|\/)([^\s&]+)/)[1];
-    var embedded_id = "https://www.youtube.com/embed/" + video_id;
-    $('.modal-topic-video-frame').attr('src', embedded_id);
-    
+    embedded_id = "https://www.youtube.com/embed/" + video_id + "?enablejsapi=1";
+    $('.modal-topic-video-frame').attr('src', embedded_id);  
+    $("#yt-player").attr("src", embedded_id);                                
     $('.modal-topic-title').html(topics[topic_id].topic);
     $('.modal-topic-contributor').html(topics[topic_id].contributor + "   |   " + contributors[topics[topic_id].contributor].affiliation + " | " + contributors[topics[topic_id].contributor].subaffiliation);
     $('.modal-topic-time-period').html("<b>" + topics[topic_id].region + " | " + topics[topic_id].time_period + "</b>");
@@ -232,14 +245,27 @@ function openTopicModal (topic_id) {
     $('#modal-region-img').attr('src', regions[topics[topic_id].region].image)
     $('.modal-topic-abstract').html(topics[topic_id].topic_abstract);
     $('#modal-region-title').html(topics[topic_id].region);
-    $('.modal-transcript-download').attr('onClick', 'downloadTranscript(' + topic_id + ');'); 
-    
+
+    // the following adds a link to the transcript pdf if it is in the spreadsheet
+    if (contributors[topics[topic_id].contributor].transcript_link != "") {
+        $('#transcript_url').html('<a href=\"' + 
+            contributors[topics[topic_id].contributor].transcript_link + '\">'
+            + 'Download full transcript (PDF)</a>'); 
+    }
+    else {
+        $('#transcript_url').html('No transcript available yet'); 
+    }
+
     topics[topic_id].keywords.forEach(function (element) {
         if (element != '') {
-            $('.modal-keywords-items').append('<li><a class="modal-topic-keyword" data-toggle="tooltip" data-placement="right" title="' + keywords[element].desc + '">' + element + '</a></li>');
+            $('.modal-keywords-items')
+              .append('<li><a class="modal-topic-keyword" data-toggle="tooltip"'
+                + 'data-placement="auto right" title="'
+                + keywords[element].desc + '">' + element + '</a></li>');
         }
     });
-    $('[data-toggle="tooltip"]').tooltip();   
+    
+$('[data-toggle="tooltip"]').tooltip();   
 }
 $('#topic-modal').on('shown.bs.modal', function() {
     $(document).off('focusin.modal');
@@ -255,7 +281,7 @@ function addToSearch (search_item) {
 }
 
 function clearSidebar () {
-    $('#results-container').empty();
+    $('#simpleList').empty();
 }
 
 /* This is REALLY sloppy, need to fix! */
@@ -273,7 +299,7 @@ function filterByRegion (region) {
     });
     
     if (found_topics == 0) {
-       $('#results-container').append('<p>There are no entries under these specific filters. If you have a story you\'d like to share for these filters, please <a target="_blank" href="http://vietnamwarstories.indiana.edu/contact/">contact us</a>!</p>');
+       $('#simpleList').append('<p>There are no entries under these specific filters. If you have a story you\'d like to share for these filters, please <a target="_blank" href="http://vietnamwarstories.indiana.edu/contact/">contact us</a>!</p>');
     }
 }
 
@@ -283,7 +309,7 @@ function searchByFilters () {
     found_topics = [];
     
     topics.forEach(function (element) {
-        console.log (element);
+       // console.log (element);
     })
     
     if (search_request == '') {
@@ -329,7 +355,7 @@ function searchByFilters () {
             addToSidebar (element); 
         });
     } else {
-        $('#results-container').append('<p>There are no entries under these specific filters. If you have a story you\'d like to share for these filters, please <a target="_blank" href="http://vietnamwarstories.indiana.edu/contact/">contact us</a>!</p>');
+        $('#simpleList').append('<p>There are no entries under these specific filters. If you have a story you\'d like to share for these filters, please <a target="_blank" href="http://vietnamwarstories.indiana.edu/contact/">contact us</a>!</p>');
     }
     
     return false;
@@ -361,16 +387,28 @@ function addToPlaylist(id) {
         $('#playlist-button').text('Playlist (' + Object.keys(youtube_playlist).length + ')');
         $('#playlist-btn-' + id).attr('onclick', 'removeFromPlaylist(' + id + ')');
         $('#playlist-btn-' + id).attr('value', '-');
+        $('#playlist-btn-' + id).attr('title', 'Remove from Playlist');
     } 
 }
 
 function removeFromPlaylist(id) {
+    if (is_playlist_active == false){
     delete youtube_playlist[id];
     topics[id].inPlaylist = false;
     $('#playlist-button').text('Playlist (' + Object.keys(youtube_playlist).length + ')');
     $('#playlist-btn-' + id).attr('onclick', 'addToPlaylist(' + id + ')');
     $('#playlist-btn-' + id).attr('value', '+');
+    $('#playlist-btn-' + id).attr('title', 'Add to Playlist');
+} else {
+    delete youtube_playlist[id];
+    topics[id].inPlaylist = false;
+    document.getElementById(id).remove();
+    $('#playlist-button').text('Playlist (' + Object.keys(youtube_playlist).length + ')');
+    $('#playlist-btn-' + id).attr('onclick', 'addToPlaylist(' + id + ')');
+    $('#playlist-btn-' + id).attr('value', '+');
+    $('#playlist-btn-' + id).attr('title', 'Add to Playlist');
 }
+};
 
 var is_playlist_active = false;
 function togglePlaylist() {
@@ -380,7 +418,7 @@ function togglePlaylist() {
     } else {
         clearSidebar();
         if (is_playlist_active) {
-            is_playlist_active = false;
+           is_playlist_active = false;
             $('#playlist-button').text('Playlist (' + Object.keys(youtube_playlist).length + ')');
             searchByFilters();
         } else {
@@ -388,7 +426,20 @@ function togglePlaylist() {
                 addToSidebar(topics[video_id]);
             }
             is_playlist_active = true;
-            $("#playlist-button").html('Playlist (x)');
+            $("#playlist-button").html('Back');
         }        
     }
+    var firstInPlaylist = youtube_playlist[0].id;
+    openTopicModal (firstInPlaylist);
+}
+
+//Disable Click to Drag message if only one video is in playlist
+function checkSortToolTip(){
+    var playlist_length = Object.keys(youtube_playlist).length;
+
+    if (playlist_length == 1){
+       var newTopId = document.getElementById("simpleList").childNodes;
+       var topic_id = newTopId[0].id;
+       $("#" + topic_id).attr("title", ""); 
+    } 
 }

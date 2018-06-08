@@ -11,6 +11,12 @@
         <link href="https://fonts.googleapis.com/css?family=Cardo" rel="stylesheet">
         <link href="css/index.css" rel="stylesheet">
         <script src="https://use.fontawesome.com/99203bc020.js"></script>
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <script src="js/bootstrap/bootstrap-multiselect.js"></script>
+        <script src="js/tabletop/tabletop.min.js"></script>
+        <script src="js/index.js"></script>
+
     </head>
     <body>
         <nav class="navbar navbar-default navbar-fixed-top">
@@ -26,8 +32,9 @@
                 </div>
                 <div id="navbar" class="navbar-collapse collapse">
                     <ul class="nav navbar-nav navbar-right">
-                        <!--<li><a href="#about"><b>GLOSSARY</b></a></li>-->
-                        <li><a href="mailto:osgoodr@indiana.edu"><b>CONTACT US</b></a></li>
+                        <li><a href="#about"><b>GLOSSARY</b></a></li>
+                        <!--<li><a href="mailto:osgoodr@indiana.edu"><b>CONTACT US</b></a></li>-->
+                        <li><a href="./email_contact.html"><b>CONTACT US</b></a></li>
                     </ul> <!-- /.navbar-nav -->
                 </div> <!-- #navbar -->
             </div> <!-- /.container-fluid -->
@@ -77,7 +84,9 @@
                             <button id="playlist-button" type="button" class="btn btn-default pull-right" onClick="togglePlaylist()" data-container="body" data-toggle="popover" data-trigger="manual" data-content="You don't have any videos added to your playlist. Add some!">Playlist (0)</button>
                         </div>
                     </div>
-                    <div id="results-container"></div>
+                    <!-- <div id="results-container"> -->
+                        <div id="simpleList" class="list-group"></div>
+                    <!-- </div> -->
                 </div>
                 <div id="map-container" class="col-sm-8">
                     <div id="region-info-panel">
@@ -89,25 +98,35 @@
                             <img class="region-detailed-image pull-right" src="">
                         </div>
                     </div>
-                    <div class="modal" id="topic-modal" tabindex="-1" role="dialog">
+     <div class="modal" id="topic-modal" tabindex="-1" role="dialog">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
                                 <div class="modal-body">
                                     <div class="row">
-                                        <div class="col-sm-8">
-                                            <div class="embed-responsive embed-responsive-16by9">
-                                                <iframe class="modal-topic-video-frame embed-responsive-item" frameborder="0" allowfullscreen></iframe>
-                                            </div>
-                                            <p class="modal-topic-contributor" style="padding: 0; margin: 0;">Topic Contributor <span class="modal-topic-contributor-affiliation">Affiliation - Subaffiliation</span></p>
-                                        </div>
                                         <div class="col-sm-4">
                                             <h3 class="modal-topic-title"><b>Topic Title</b></h3>
                                             <p class="modal-topic-time-period" style="padding: 0; margin: 0;">????-????</p>
                                             <hr />
                                             <p class="modal-topic-abstract" style="padding-top: 5px;">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam a dignissim orci, in consequat ex. Donec nisl ex, ultricies eget dui vitae, condimentum fringilla lacus. Duis vestibulum ipsum eu augue faucibus aliquam.</p>
-                                            <p class="modal-transcript-download"><b>Download full transcript (PDF)</b></p>
-                                            <hr />
-                                            <h4 class="modal-keywords-title"><b>Key Terms</b> <small>(hover for info)</small></h4>
+                                            <p class="modal-transcript-download"><b><span id="transcript_url">Download full transcript (PDF)</span></b></p>
+                                        </div>
+                                        <div class="col-sm-8">
+                                            <div class="embed-responsive embed-responsive-16by9">
+                                                          <div<iframe id="yt-player" src="https://www.youtube.com/embed/p7ayu4_HBYA?enablejsapi=1" frameborder="0" allowfullscreen></iframe>
+                                            </div>
+                                            <p class="modal-topic-contributor" style="padding: 0; margin: 0;">
+                                                Topic Contributor 
+                                                    <span class="modal-topic-contributor-affiliation">Affiliation - Subaffiliation
+                                                    </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- made a new row to hold terms, this locates tooltip below video-->
+                                    <div class="row">
+                                        <div class="col-sm-12">
+                                            <h4 class="modal-keywords-title"><b>Key Terms</b> 
+                                                <small>(hover for info)</small></h4>
                                             <ul class="modal-keywords-items"></ul>
                                         </div>
                                     </div>
@@ -400,11 +419,7 @@
                 </div>
             </div>
         </div>
-        
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-        <script src="js/bootstrap/bootstrap-multiselect.js"></script>
-        <script src="js/tabletop/tabletop.min.js"></script>
-        <script src="js/index.js"></script>
-    </body>
-</html>
+        <script src="js/sortable.js"></script>
+        <script src="js/list_sort.js"></script>
+        </body>
+    </html>
